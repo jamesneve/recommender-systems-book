@@ -73,6 +73,8 @@ def cosine_coefficient(mean_centred_matrix, item_pair):
         denv += row[item_pair[1]] ** 2
 
     den = np.sqrt(denu) * np.sqrt(denv)
+    if den == 0:
+        return 0
     return float(num) / den
 
 

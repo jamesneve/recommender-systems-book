@@ -9,48 +9,51 @@ import numpy as np
 # example_matrix = [[7, 6, 7, 4, 5, 4], [6, 7, np.NaN, 4, 3, 4], [np.NaN, 3, 3, 1, 1, np.NaN], [1, 2, 2, 3, 3, 4],
 #                   [1, np.NaN, 1, 2, 3, 3]]
 # print(example_matrix)
-#
-# pearson_coefficients = calculate_pearson_coefficients(example_matrix)
-# print("Pearson Coefficients")
-# print(pearson_coefficients)
-#
-# pearson_rating = predict_pearson_rating((2, 0), example_matrix, pearson_coefficients, 2)
-# print("Predicted rating for User 3, Item 1 using Pearson Correlation Coefficient: %f" % pearson_rating)
-#
-# cosine_coefficients = calculate_adjusted_cosine_coefficients(example_matrix)
-# cosine_rating = predict_cosine_rating((2, 0), example_matrix, cosine_coefficients, 2)
-# print("Predicted rating for User 3, Item 1 using Pearson Correlation Coefficient %f" % cosine_rating)
-#
-# print("---------------")
-# print("Dimensionality Reduction Step")
-#
-# print("Estimate missing values")
-# rf = compute_rf(example_matrix)
-# s = compute_s(rf)
-#
-# print("Positive semi-definite matrix between pairs of items")
-# print(s)
-#
-# pd = compute_pd(s, 2)
-#
-# res = np.matmul(rf, pd)
-# print("Dimensionality reduced result")
-# print(res)
 
 example_matrix = readMovieLens()
-print("Dimensionality Reduction Step")
+print("---- Dimensionality Reduction ---")
 
 print("Estimate missing values")
 rf = compute_rf(example_matrix)
 s = compute_s(rf)
 
-print("Positive semi-definite matrix between pairs of items")
-print(s)
+print("Generate positive semi-definite matrix between pairs of items")
 
 pd = compute_pd(s, 2)
-print("Largest eigenvectors for pd")
-print(pd)
+print("Find largest eigenvectors for pd")
 
 res = np.matmul(rf, pd)
-print("Dimensionality reduced result")
-print(res)
+
+print("--- Clustering ---")
+print("Get representatives from eigenvector matrix")
+reps = get_representatives(res, 30)
+
+print("Cluster")
+clusters = cluster_around_representatives(res, reps)
+
+print("Get matrices from clusters")
+matrices = matrices_from_clusters(rf, clusters)
+
+
+print("-- Collaborative Filtering --")
+print("Here's one of the clusters - because of sampling, it'll be different every time")
+example_cluster = matrices[3]
+print(example_cluster)
+
+# print("Get adjusted cosine coefficients for one of the clusters")
+# cosine_coefficients = calculate_adjusted_cosine_coefficients(example_cluster)
+#
+# print("Predict rating for user X, item X")
+# cosine_rating = predict_cosine_rating((2, 0), example_cluster, cosine_coefficients, 2)
+#
+# print("Cosine rating result")
+# print(cosine_rating)
+
+print("Get pearson coefficients for one of the clusters")
+pearson_coefficients = calculate_pearson_coefficients(example_cluster)
+
+print("Predict rating for user 2, item 0")
+pearson_rating = predict_pearson_rating((2, 0), example_cluster, pearson_coefficients, 2)
+
+print("Predicted rating for user 2, item 0 ")
+print(pearson_rating)
